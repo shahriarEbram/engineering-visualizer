@@ -105,7 +105,7 @@ selected_project_code = st.selectbox("Select Project Code", options=unique_proje
 
 # فیلتر کردن داده‌ها بر اساس project_code انتخاب‌شده
 project_filtered_df = df[df['project_code'] == selected_project_code]
-
+project_filtered_df = project_filtered_df.drop(columns=['id'])
 st.subheader(f"Information for Project Code: {selected_project_code}")
 st.dataframe(project_filtered_df, hide_index=True, use_container_width=True)
 
@@ -124,7 +124,7 @@ df2 = fetch_data()
 st.subheader("Filter By Person")
 selected_person = st.selectbox("Select Person", options=df['person_name'].unique())
 filtered_data = df2[df2['person_name'] == selected_person]
-
+filtered_data = filtered_data.drop(columns=['id'])
 st.subheader(f"Information for Person: {selected_person}")
 st.dataframe(filtered_data, hide_index=True, use_container_width=True)
 
