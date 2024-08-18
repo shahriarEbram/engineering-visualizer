@@ -24,7 +24,7 @@ def fetch_data():
 df = fetch_data()
 
 # Streamlit app setup
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide",page_title="Engineering Visualization")
 st.title("Engineering Dashboard")
 
 # Calculate total person-hours for each project
