@@ -24,7 +24,7 @@ def fetch_data():
 df = fetch_data()
 
 # Streamlit app setup
-st.set_page_config(layout="wide",page_title="Engineering Visualization")
+st.set_page_config(layout="wide", page_title="Engineering Visualization")
 st.title("Engineering Dashboard")
 
 # Calculate total person-hours for each project
@@ -39,13 +39,14 @@ st.plotly_chart(fig)
 # Visualizing Project Distribution
 st.divider()
 st.subheader("Project Code Distribution")
-df_filtered = df[df['project_code'] != "000000000"]
-project_code_distribution = df_filtered.groupby(['project_code', 'project_name']).size().reset_index(name='count')
+
+# df_filtered = df[df['project_code'] != "000000000"]
+# project_code_distribution = df_filtered.groupby(['project_code', 'project_name']).size().reset_index(name='count')
 
 fig1 = px.pie(
-    project_code_distribution,
-    names='project_code',
-    values='count',
+    project_hours,
+    names='project_name',
+    values='total_hours',
     title="Project Code Distribution",
     hover_data={'project_name': True}
 )
@@ -57,48 +58,45 @@ st.plotly_chart(fig1)
 decoded_results = df['project_code'].apply(decode_code2)
 df['decoded'], df['map_source_str'], df['map_tp_str'] = zip(*decoded_results)
 
-# Filter data for map_source_str
-source_counts = df['map_source_str'].value_counts().reset_index()
-source_counts.columns = ['map_source_str', 'count']
-source_counts_filtered = source_counts[source_counts['map_source_str'] != 'امور جاری']
+# گروه‌بندی داده‌ها بر اساس map_source_str و محاسبه مجموع duration
+source_duration = df.groupby('map_source_str')['duration'].sum().reset_index()
+source_duration.columns = ['map_source_str', 'total_duration']
+source_duration_filtered = source_duration[source_duration['map_source_str'] != 'امور جاری']
 
 col1, col2 = st.columns(2)
 with col1:
-    # Create a pie chart for map_source_str
+    # ایجاد نمودار دایره‌ای برای map_source_str با استفاده از مجموع duration
     fig2 = px.pie(
-        source_counts_filtered,
+        source_duration_filtered,
         names='map_source_str',
-        values='count',
-        title="Project Source Distribution",
+        values='total_duration',
+        title="Project Source Duration Distribution",
         hover_data={'map_source_str': True}
     )
     fig2.update_traces(textinfo='percent+label',
-                       hovertemplate='<b>Source:</b> %{label}<br><b>Count:</b> %{value}<extra></extra>')
+                       hovertemplate='<b>Source:</b> %{label}<br><b>Total Duration:</b> %{value} hours<extra></extra>')
     st.plotly_chart(fig2)
 
-    # Filter data for map_tp_str
-    type_counts = df['map_tp_str'].value_counts().reset_index()
-    type_counts.columns = ['map_tp_str', 'count']
+    # گروه‌بندی داده‌ها بر اساس map_tp_str و محاسبه مجموع duration
+    type_duration = df.groupby('map_tp_str')['duration'].sum().reset_index()
+    type_duration.columns = ['map_tp_str', 'total_duration']
 
 with col2:
-    # Create a pie chart for map_tp_str
+    # ایجاد نمودار دایره‌ای برای map_tp_str با استفاده از مجموع duration
     fig3 = px.pie(
-        type_counts,
+        type_duration,
         names='map_tp_str',
-        values='count',
-        title="Project Type Distribution",
+        values='total_duration',
+        title="Project Type Duration Distribution",
         hover_data={'map_tp_str': True}
     )
     fig3.update_traces(textinfo='percent+label',
-                       hovertemplate='<b>Type:</b> %{label}<br><b>Count:</b> %{value}<extra></extra>')
+                       hovertemplate='<b>Type:</b> %{label}<br><b>Total Duration:</b> %{value} hours<extra></extra>')
     st.plotly_chart(fig3)
-
-
-
 
 # New Feature: Select project code and show person-hours
 st.divider()
-st.subheader("Filter By Project Code    ")
+st.subheader("Filter By Project Code")
 df = fetch_data()
 unique_project_codes = df['project_code'].unique()
 selected_project_code = st.selectbox("Select Project Code", options=unique_project_codes)
@@ -110,12 +108,15 @@ st.subheader(f"Information for Project Code: {selected_project_code}")
 st.dataframe(project_filtered_df, hide_index=True, use_container_width=True)
 
 # ایجاد یک بار چارت بر اساس TASK_NAME و DURATION
-fig = px.bar(project_filtered_df, x='task_name', y='duration', title="Task Duration", labels={'DURATION': 'Duration (hours)', 'TASK_NAME': 'Task Name'})
+task_duration = project_filtered_df.groupby('task_name')['duration'].sum().reset_index()
 
-# نمایش بار چارت در Streamlit
-st.plotly_chart(fig)
+fig4 = px.bar(task_duration,
+              x='task_name',
+              y='duration',
+              title="Task Duration",
+              labels={'duration': 'Duration (hours)', 'task_name': 'Task Name'})
 
-
+st.plotly_chart(fig4)
 
 # ********************************* #
 st.divider()
@@ -130,9 +131,13 @@ st.dataframe(filtered_data, hide_index=True, use_container_width=True)
 
 # Visualization for filtered data
 filtered_hours = filtered_data.groupby('project_name')['duration'].sum().reset_index()
-filtered_hours.rename(columns={'duration': 'total_hours'}, inplace=True)
 
-fig4 = px.bar(filtered_hours, x='project_name', y='total_hours', title=f"Total Person-Hours for {selected_person}")
-st.plotly_chart(fig4)
+
+fig5 = px.bar(filtered_hours,
+              x='project_name',
+              y='duration',
+              title=f"Total Person-Hours for {selected_person}",
+              labels={'duration': 'Duration (hours)', 'task_name': 'Project Name'})
+st.plotly_chart(fig5)
 
 # ********************************* #
