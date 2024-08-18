@@ -39,7 +39,8 @@ st.plotly_chart(fig)
 # Visualizing Project Distribution
 st.divider()
 st.subheader("Project Code Distribution")
-project_code_distribution = df.groupby(['project_code', 'project_name']).size().reset_index(name='count')
+df_filtered = df[df['project_code'] != "000000000"]
+project_code_distribution = df_filtered.groupby(['project_code', 'project_name']).size().reset_index(name='count')
 
 fig1 = px.pie(
     project_code_distribution,
@@ -118,13 +119,14 @@ st.plotly_chart(fig)
 
 # ********************************* #
 st.divider()
+df2 = fetch_data()
 # Additional Filtering Options
 st.subheader("Filter By Person")
 selected_person = st.selectbox("Select Person", options=df['person_name'].unique())
-filtered_data = df[df['person_name'] == selected_person]
+filtered_data = df2[df2['person_name'] == selected_person]
 
 st.subheader(f"Information for Person: {selected_person}")
-st.dataframe(filtered_data)
+st.dataframe(filtered_data, hide_index=True, use_container_width=True)
 
 # Visualization for filtered data
 filtered_hours = filtered_data.groupby('project_name')['duration'].sum().reset_index()
@@ -134,6 +136,3 @@ fig4 = px.bar(filtered_hours, x='project_name', y='total_hours', title=f"Total P
 st.plotly_chart(fig4)
 
 # ********************************* #
-
-
-
