@@ -234,7 +234,8 @@ def decode_code(code):
                 )
 
 
-def decode_code2(code):
+def decode_code2(code,ret_product=False):
+
     code = code.upper()
     equipment, subset, product, map_src, map_tp, number = code[:1], code[1:3], code[3:5], code[5], code[6], code[7:]
 
@@ -244,7 +245,8 @@ def decode_code2(code):
     product_name_str = product_name.get(product, "Unknown Product")
     map_source_str = map_source.get(map_src, "Unknown Source")
     map_tp_str = map_type.get(map_tp, "Unknown Type")
-
+    if ret_product:
+        return product_name_str
     if code == "000000000":
         return "امور جاری", "امور جاری", "امور جاری"
     else:
