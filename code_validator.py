@@ -63,11 +63,12 @@ equipment_name_subset = {
         '11': 'منيفولد دود',
         '12': 'منيفولد هوا',
         '13': ' لنگي و سيت و گايد',
-        '14': 'میز صافی سطح'
+        '14': 'میز صافی سطح',
+        '15': 'مولتی کنترلی استکانی'
 
     },
     'M': {
-        '10': '0',
+
         '11': 'ریخته گری DC',
         '12': 'ریخته گری TILT',
         '13': 'واترجکت',
@@ -114,6 +115,7 @@ equipment_name_subset = {
     'T': {
         '10': 'هلدر',
         '11': 'چکش بادی',
+        '12': 'مولتی 10 محوره'
     },
     'V': {
         '10': 'مدل قطعه دیوایدر',
@@ -156,6 +158,8 @@ product_name = {
     '13': 'K4',
     '14': 'ATV',
     '15': 'کپه یاتاقان 5و1',
+    '16': 'ME16',
+    '17': 'IK3',
     '18': 'پژو گرویتی',
     '19': 'پیکان',
     '20': 'پراید',
@@ -169,6 +173,7 @@ product_name = {
     '29': 'فیات تمپرا',
     '30': 'مسترسیلندر سمند',
     '31': 'مسترسیلندر 206',
+    '32': 'ME15',
     '33': 'کپه یاتاقان 3و3',
     '38': 'S81',
     '42': 'کپه یاتاقان 2و4',
@@ -234,8 +239,7 @@ def decode_code(code):
                 )
 
 
-def decode_code2(code,ret_product=False):
-
+def decode_code2(code):
     code = code.upper()
     equipment, subset, product, map_src, map_tp, number = code[:1], code[1:3], code[3:5], code[5], code[6], code[7:]
 
@@ -245,8 +249,7 @@ def decode_code2(code,ret_product=False):
     product_name_str = product_name.get(product, "Unknown Product")
     map_source_str = map_source.get(map_src, "Unknown Source")
     map_tp_str = map_type.get(map_tp, "Unknown Type")
-    if ret_product:
-        return product_name_str
+
     if code == "000000000":
         return "امور جاری", "امور جاری", "امور جاری"
     else:
