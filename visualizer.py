@@ -8,6 +8,7 @@ from code_validator import decode_code2
 import streamlit_authenticator as stauth
 import pickle
 from generate_keys import staff_names, usernames
+import streamlit_vertical_slider as svs
 
 def gradient_divider():
     # Gradient divider using HTML and CSS
@@ -71,37 +72,94 @@ if authentication_status:
 
     st.title("Engineering Dashboard")
 
-    # Calculate total person-hours for each project
+    # فیلتر کردن پروژه‌هایی که نامشان "امور جاری" نیست
     filtered_df = df[df['project_name'] != "امور جاری"]
+
+    # محاسبه مجموع ساعات کاری برای هر پروژه
     project_hours = filtered_df.groupby('project_name')['duration'].sum().reset_index()
     project_hours.rename(columns={'duration': 'total_hours'}, inplace=True)
 
-    # Plot person-hours per project
-    fig = px.bar(project_hours, x='project_name', y='total_hours', title="Total Person-Hours per Project")
+    # دریافت کمترین و بیشترین ساعت کاری برای تنظیم مقادیر اسلایدر
+    min_hours = project_hours['total_hours'].min()
+    max_hours = project_hours['total_hours'].max()
+
+    # ایجاد اسلایدر برای انتخاب حداقل ساعات مورد نظر و ذخیره مقدار آن در session_state
+    threshold = st.slider(
+        "Select minimum hours to display",
+        min_value=min_hours,
+        max_value=max_hours,
+        value=21.5,
+        key='threshold'
+    )
+
+    # فیلتر کردن پروژه‌ها براساس مقدار threshold
+    main_projects = project_hours[project_hours['total_hours'] >= threshold]
+    other_projects = project_hours[project_hours['total_hours'] < threshold]
+
+    # محاسبه مجموع ساعات برای پروژه‌های "Other"
+    other_total = other_projects['total_hours'].sum()
+    main_projects = pd.concat([main_projects, pd.DataFrame({'project_name': ['Other'], 'total_hours': [other_total]})],
+                              ignore_index=True)
+
+    # مرتب‌سازی پروژه‌ها براساس total_hours به ترتیب نزولی
+    main_projects = main_projects.sort_values(by='total_hours', ascending=False)
+
+    # رسم نمودار
+    fig = px.bar(main_projects, x='project_name', y='total_hours', title="Total Person-Hours per Project")
     st.plotly_chart(fig)
 
     # Visualizing Project Distribution
     gradient_divider()
-    st.subheader("Project Code Distribution")
 
-    # df_filtered = df[df['project_code'] != "000000000"]
-    # project_code_distribution = df_filtered.groupby(['project_code', 'project_name']).size().reset_index(name='count')
+
+
+    # *********************************************************************************************************************************
+
+    st.subheader("Project Code Distribution")
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 3, 1, 1])
+
+    with col2:
+        st.subheader("")
+        st.subheader("")
+        threshold2 = svs.vertical_slider(default_value=48,
+
+                                        key='threshold2',
+                                        min_value=min_hours,
+                                        max_value=max_hours,
+                                        slider_color='blue',  # optional
+                                        track_color='#FBFBFB',  # optional
+                                        thumb_color='#F3F3E0',  # optional
+                                        )
+    # به‌روزرسانی مقدار threshold2 در session state
+    #st.session_state['threshold2'] = threshold2
+
+    # فیلتر کردن پروژه‌ها براساس مقدار threshold
+    main_projects = project_hours[project_hours['total_hours'] >= threshold2]
+    other_projects = project_hours[project_hours['total_hours'] < threshold2]
+
+    # محاسبه مجموع ساعات برای پروژه‌های "Other"
+    other_total = other_projects['total_hours'].sum()
+    main_projects = pd.concat([main_projects, pd.DataFrame({'project_name': ['Other'], 'total_hours': [other_total]})],
+                              ignore_index=True)
+    # مرتب‌سازی پروژه‌ها براساس total_hours به ترتیب نزولی
+    main_projects = main_projects.sort_values(by='total_hours', ascending=False)
 
     fig1 = px.pie(
-        project_hours,
+        main_projects,
         names='project_name',
         values='total_hours',
         title="Project Code Distribution",
         hover_data={'project_name': True}
     )
-    st.plotly_chart(fig1)
 
-    # ********************************* #
-    # Decode project codes and extract source and type
+    with col3:
+        st.plotly_chart(fig1)
+
+# *********************************************************************************************************************************
+
+
     decoded_results = df['project_code'].apply(decode_code2)
     df['decoded'], df['map_source_str'], df['map_tp_str'] = zip(*decoded_results)
-
-    # گروه‌بندی داده‌ها بر اساس map_source_str و محاسبه مجموع duration
     source_duration = df.groupby('map_source_str')['duration'].sum().reset_index()
     source_duration.columns = ['map_source_str', 'total_duration']
     source_duration_filtered = source_duration[source_duration['map_source_str'] != 'امور جاری']
@@ -172,14 +230,19 @@ if authentication_status:
 
 
     # Create a bar chart to visualize cumulative duration per project
-    fig = px.bar(project_duration,
-                 x='project_code',
-                 y='duration',
-                 title="Cumulative Duration per Product",
-                 labels={'duration': 'Cumulative Duration (hours)', 'project_code': 'Project Code'})
-
-    # Display the chart in Streamlit
+    filtered_hours = project_filtered_df.groupby('project_name')['duration'].sum().reset_index()
+    fig = px.bar(filtered_hours,
+                  x='project_name',
+                  y='duration',
+                  title=f"Total Person-Hours for {selected_product_name}",
+                  labels={'duration': 'Duration (hours)', 'task_name': 'Project Name'})
     st.plotly_chart(fig)
+
+
+
+
+
+
     # ********************************* #
     gradient_divider()
     st.subheader("Filter By Project Name")
