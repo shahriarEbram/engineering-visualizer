@@ -71,9 +71,9 @@ if authentication_status:
     df = fetch_data()
 
     # Streamlit app setup
-    st.subheader(" ")
-    st.title("Engineering Dashboard")
-
+    col1,col2,col3 = st.columns(3)
+    with col2:
+        st.header("Engineering Dashboard")
     # فیلتر کردن پروژه‌هایی که نامشان "امور جاری" نیست
     filtered_df = df[df['project_name'] != "امور جاری"]
 
@@ -121,10 +121,14 @@ if authentication_status:
 
     st.subheader("Project Code Distribution")
     col1, col2, col3, col4, col5 = st.columns([1, 1, 3, 1, 1])
-
     with col2:
-        st.subheader(" ")
-        st.subheader(" ")
+        st.text(" ")
+        st.text(" ")
+        st.text(" ")
+        st.text(" ")
+        st.text(" ")
+        st.text(" ")
+        st.text(" ")
         threshold2 = svs.vertical_slider(default_value=48,
 
                                         key='threshold2',
