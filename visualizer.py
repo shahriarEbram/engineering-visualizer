@@ -20,7 +20,9 @@ def gradient_divider():
     )
 
 st.set_page_config(layout="wide", page_title="Engineering Visualization", initial_sidebar_state="collapsed")
+st.markdown("""
 
+""", unsafe_allow_html=True)
 # Database setup
 db_path = Path(__file__).parent / "engineering_dashboard.db"
 engine = create_engine(f'sqlite:///{db_path}')
@@ -69,7 +71,7 @@ if authentication_status:
     df = fetch_data()
 
     # Streamlit app setup
-
+    st.subheader(" ")
     st.title("Engineering Dashboard")
 
     # فیلتر کردن پروژه‌هایی که نامشان "امور جاری" نیست
@@ -82,6 +84,8 @@ if authentication_status:
     # دریافت کمترین و بیشترین ساعت کاری برای تنظیم مقادیر اسلایدر
     min_hours = project_hours['total_hours'].min()
     max_hours = project_hours['total_hours'].max()
+
+
 
     # ایجاد اسلایدر برای انتخاب حداقل ساعات مورد نظر و ذخیره مقدار آن در session_state
     threshold = st.slider(
@@ -119,8 +123,8 @@ if authentication_status:
     col1, col2, col3, col4, col5 = st.columns([1, 1, 3, 1, 1])
 
     with col2:
-        st.subheader("")
-        st.subheader("")
+        st.subheader(" ")
+        st.subheader(" ")
         threshold2 = svs.vertical_slider(default_value=48,
 
                                         key='threshold2',
@@ -130,8 +134,6 @@ if authentication_status:
                                         track_color='#FBFBFB',  # optional
                                         thumb_color='#F3F3E0',  # optional
                                         )
-    # به‌روزرسانی مقدار threshold2 در session state
-    #st.session_state['threshold2'] = threshold2
 
     # فیلتر کردن پروژه‌ها براساس مقدار threshold
     main_projects = project_hours[project_hours['total_hours'] >= threshold2]
